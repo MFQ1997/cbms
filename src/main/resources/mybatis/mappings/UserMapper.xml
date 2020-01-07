@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gdupt.cbms.mapper.UserMapper">
+
+    <!--将实体类的属性和数据库中的字段进行绑定，用于查询到权限级别。-->
+    <resultMap id="findUserWithPermission" type="com.gdupt.cbms.entity.shiro.User">
+        <result property="id" column="id" />
+        <result property="userName" column="username"/>
+        <result property="realName" column="realname" />
+        <result property="password" column="password"/>
+        <result property="selfNum" column="self_num" />
+        <result property="salt" column="salt"/>
+        <result property="companyId" column="company_id" />
+        <result property="phone" column="phone" />
+        <result property="email" column="email" />
+        <result property="status" column="status" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+        <result property="remark" column="remark" />
+        <collection property="roles" ofType="com.gdupt.cbms.entity.shiro.Role">
+            <result property="id" column="r_id" />
+            <result property="roleName" column="r_name" />
+            <result property="status" column="r_status" />
+            <result property="remark" column="r_remark" />
+            <collection property="permissions" ofType="com.gdupt.cbms.entity.shiro.Permission">
+                <result property="id" column="permission_id"/>
+                <result property="pid" column="pid" />
+                <result property="permissionName" column="p_name"/>
+                <result property="url" column="url"/>
+                <result property="icon" column="icon"/>
+                <result property="status" column="p_status"/>
+                <result property="sort" column="sort"/>
+                <result property="type" column="type"/>
+                <result property="perms" column="perms"/>
+                <result property="remark" column="p_remark"/>
+            </collection>
+        </collection>
+    </resultMap>
+
+    <!--将实体类的属性和数据库中的字段进行绑定，用于查询到用户登录级别-->
+    <resultMap id="checkLogin" type="com.gdupt.cbms.entity.shiro.User">
+        <result property="id" column="id" />
+        <result property="userName" column="username" />
+        <result property="password" column="password" />
+        <result property="companyId" column="company_id" />
+        <result property="salt" column="salt"/>
+        <result property="status" column="status" />
+    </resultMap>
+
+    <!--将实体类的属性和数据库中的字段进行绑定，用于查询到用角色级别-->
+    <resultMap id="findUserWithRoleResult" type="com.gdupt.cbms.entity.shiro.User">
+        <result property="id" column="id" />
+        <result property="userName" column="username"/>
+        <result property="realName" column="realname" />
+        <result property="password" column="password"/>
+        <result property="selfNum" column="self_num" />
+        <result property="salt" column="salt"/>
+        <result property="companyId" column="company_id" />
+        <result property="phone" column="phone" />
+        <result property="email" column="email" />
+        <result property="status" column="status" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+        <result property="remark" column="remark" />
+        <collection property="roles" ofType="com.gdupt.cbms.entity.shiro.Role">
+            <result property="id" column="r_id" />
+            <result property="roleName" column="r_name" />
+            <result property="status" column="r_status" />
+            <result property="remark" column="r_remark" />
+        </collection>
+    </resultMap>
+
+    <!--根据所有用户个人信息以及对应的角色信息-->
+    <select id="findAllUserWithRole" resultMap="findUserWithRoleResult">
+        select t_user.*,
+        t_user_info.realname,t_user_info.photo,t_user_info.phone,t_user_info.self_num,t_user_info.location,t_user_info.create_time,t_user_info.update_time,t_user_info.remark,
+        t_role.id r_id, t_role.role_name r_name,t_role.status r_status,t_role.remark r_remark
+        from t_user,t_user_info, t_role, t_user_role
+        where  t_user.id = t_user_role.user_id
+        and t_user_role.role_id = t_role.id
+        and t_user.id = t_user_info.uid
+    </select>
+
+    <!--根据id获取到当前用户的角色，权限，以及详细信息-->
+    <select id="findOneUserById" parameterType="Integer" resultMap="findUserWithPermission" >
+        select t_user.*,
+        t_user_info.realname,t_user_info.photo,t_user_info.phone,t_user_info.self_num,t_user_info.location,t_user_info.create_time,t_user_info.update_time,t_user_info.remark,
+        t_role.id r_id, t_role.role_name r_name,t_role.status r_status,t_role.remark r_remark,
+        t_permission.id permission_id,t_permission.status p_status,t_permission.permission_name p_name,pid,t_permission.url,t_permission.perms,t_permission.type,t_permission.icon,t_permission.sort,t_permission.remark p_remark
+        from t_user,t_user_info, t_role, t_user_role, t_permission, t_role_permission
+        where t_user.id = t_user_role.user_id
+        and t_user.id = t_user_info.uid
+        and t_user_role.role_id = t_role.id
+        and t_role.id = t_role_permission.role_id
+        and t_role_permission.permission_id = t_permission.id
+        and t_user.id = #{id}
+    </select>
+
+    <!--根据用户名进行查询权限-->
+    <select id="findOneUserByName" parameterType="String" resultMap="findUserWithPermission" >
+        select t_user.*,
+        t_user_info.realname,t_user_info.photo,t_user_info.phone,t_user_info.self_num,t_user_info.location,t_user_info.create_time,t_user_info.update_time,t_user_info.remark,
+        t_role.id r_id, t_role.role_name r_name,t_role.status r_status,t_role.remark r_remark,
+        t_permission.id permission_id,t_permission.status p_status,t_permission.permission_name p_name,pid,t_permission.url,t_permission.perms,t_permission.type,t_permission.icon,t_permission.sort,t_permission.remark p_remark
+        from t_user,t_user_info, t_role, t_user_role, t_permission, t_role_permission
+        where t_user.id = t_user_role.user_id
+        and t_user.id = t_user_info.uid
+        and t_user_role.role_id = t_role.id
+        and t_role.id = t_role_permission.role_id
+        and t_role_permission.permission_id = t_permission.id
+        and t_user.username = #{userName}
+    </select>
+
+    <select id="findUserWithRole" parameterType="Integer" resultMap="findUserWithPermission" >
+        select t_user.*,
+        t_user_info.realname,t_user_info.photo,t_user_info.phone,t_user_info.self_num,t_user_info.location,t_user_info.create_time,t_user_info.update_time,t_user_info.remark,
+        t_role.id r_id, t_role.role_name r_name,t_role.status r_status,t_role.remark r_remark,
+        t_permission.id permission_id,t_permission.status p_status,t_permission.permission_name p_name,pid,t_permission.url,t_permission.perms,t_permission.type,t_permission.icon,t_permission.sort,t_permission.remark p_remark
+        from t_user,t_user_info, t_role, t_user_role, t_permission, t_role_permission
+        where t_user.id = t_user_role.user_id
+        and t_user.id = t_user_info.uid
+        and t_user_role.role_id = t_role.id
+        and t_role.id = t_role_permission.role_id
+        and t_role_permission.permission_id = t_permission.id
+        and t_user.id = #{id}
+    </select>
+
+
+    <!--检查是否存在同名的-->
+    <select id="hasName" parameterType="String" resultType="com.gdupt.cbms.entity.shiro.User">
+        select username from t_user where username =#{userName}
+    </select>
+
+    <!--获取登录的时候所需要的结果Map-->
+    <resultMap id="UserResultToLogin" type="com.gdupt.cbms.entity.shiro.User">
+        <result property="userName" column="username"/>
+        <result property="password" column="password"/>
+        <result property="salt" column="salt"/>
+    </resultMap>
+
+    <select id="findUserToLogin" parameterType="String" resultMap="UserResultToLogin">
+        select u.* from t_user u where username= #{userName}
+    </select>
+
+    <!--<select id="findOneUserByName1" parameterType="String" resultMap="userResultMap">
+       select u.*
+		,r.*,ui.*
+		from t_user u
+		LEFT JOIN t_user_info ui on u.id = ui.uid
+		LEFT JOIN t_user_role ur on u.id= ur.user_id
+		LEFT JOIN t_role r on ur.role_id=r.id
+		where username= #{userName}
+    </select>-->
+    <!--设置需要查询的所有的属性，用以替代“*”号-->
+    <sql id="all_column">
+        id,username,realname,password,self_num,salt,company_id,phone,email,status,create_time,update_time,remark
+    </sql>
+    <sql id="simple_column">
+        id,username,password,salt,status,company_id
+    </sql>
+
+    <!--添加用户的注册信息-->
+    <insert id="save" parameterType="com.gdupt.cbms.entity.shiro.User" useGeneratedKeys="true" keyProperty="id">
+        insert into t_user(username,password,salt,status) values (#{userName},#{password},#{salt},#{status})
+    </insert>
+    <!--完善添加用户的信息-->
+    <insert id="complete" parameterType="com.gdupt.cbms.entity.shiro.User">
+        insert into t_user_info(uid,realname,photo,self_num,phone,create_time,update_time,remark) values (#{id},#{realName},#{photo},#{selfNum},#{phone},#{createTime},#{updateTime},#{remark})
+    </insert>
+    <!--设置默认的普通的用户角色信息-->
+    <insert id="setDefaultRole" parameterType="Integer">
+        insert into t_user_role(user_id,role_id) values (#{userId},1)
+    </insert>
+
+    <!--更新user表的用户信息-->
+    <update id="updateUserById" parameterType="com.gdupt.cbms.entity.shiro.User">
+        update t_user
+        <set>
+            <if test="userName != null">
+                username = #{userName},
+            </if>
+            <if test="password != null">
+                password = #{password},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="salt != null">
+                salt = #{salt}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+    <!--完善更新user_info的用户信息-->
+    <update id="updateUser" parameterType="com.gdupt.cbms.entity.shiro.User">
+        update t_user_info
+        <set>
+            <if test="realName != null">
+                realname = #{realName},
+            </if>
+            <if test="photo != null">
+                photo = #{photo},
+            </if>
+            <if test="phone != null">
+                phone = #{phone},
+            </if>
+            <if test="selfNum != null">
+                self_num = #{selfNum},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="remark != null"></if>
+        </set>
+        where uid = #{id}
+    </update>
+    
+    <!--根据id查询信息 -->
+    <select id="findUserById" parameterType="Integer" resultType="com.gdupt.cbms.entity.shiro.User">
+		select <include refid="simple_column" /> from t_user where id = #{id}
+	</select>
+    <!-- 查询所有的管理员 -->
+   <!-- <select id="users"  resultType="HashMap">
+		select * from t_user
+	</select>-->
+    <!--根据userNamem模糊查询用户-->
+    <select id="findUserByName" parameterType="String" resultType="HashMap">
+        select <include refid="simple_column"></include> from t_user WHERE username like concat('%',#{userName},'%')
+    </select>
+
+    <!--根据Id删除用户-->
+   <delete id="deleteById" parameterType="Integer" >
+        delete from t_user where id = #{id}
+   </delete>
+
+</mapper>

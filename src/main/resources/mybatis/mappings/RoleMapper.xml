@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gdupt.cbms.mapper.RoleMapper">
+    <resultMap id="RoleResultMap" type="com.gdupt.cbms.entity.shiro.Role">
+        <result property="id" column="r_id" />
+        <result property="roleName" column="r_name" />
+        <result property="status" column="r_status" />
+        <result property="remark" column="r_remark" />
+    </resultMap>
+
+    <!--设置所有的字段-->
+    <sql id="all_column">
+        id r_id,role_name r_name,status r_status,remark r_remark
+    </sql>
+
+    <!--添加角色-->
+    <insert id="save" parameterType="com.gdupt.cbms.entity.shiro.Role" useGeneratedKeys="true" keyProperty="id">
+        insert into t_role(role_name,status,remark) values (#{roleName},#{status},#{remark})
+    </insert>
+
+    <!--删除角色信息-->
+    <delete id="delete" parameterType="Integer">
+        delete from t_role where id = #{id}
+    </delete>
+
+    <!--更新角色信息-->
+    <update id="update" parameterType="com.gdupt.cbms.entity.shiro.Role">
+        update t_role
+        <set>
+            <if test="roleName != null">
+                role_name = #{roleName}
+            </if>
+            <if test="status != null">
+                status = #{status}
+            </if>
+            <if test="remark != null">
+                remark = #{remark}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--查询所有的角色-->
+    <select id="roles" resultMap="RoleResultMap">
+        select <include refid="all_column" /> from t_role
+    </select>
+
+    <!--根据id获取用户的所有角色-->
+    <select id="role" parameterType="Integer" resultMap="RoleResultMap">
+        select r.id r_id,r.role_name r_name,r.status r_status,r.remark r_remark
+		from t_role r
+		LEFT JOIN t_user_role ur on ur.role_id=r.id
+		where ur.user_id = #{id}
+    </select>
+    <!--角色模糊查询-->
+    <select id="findRoleByName" parameterType="string" resultMap="RoleResultMap">
+        select <include refid="all_column"></include> from t_role
+        <where>
+            role_name like concat('%',#{roleName},'%')
+        </where>
+    </select>
+</mapper>

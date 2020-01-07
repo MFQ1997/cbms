@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gdupt.cbms.mapper.TeacherMapper">
+
+    <resultMap id="teacherResultMap" type="com.gdupt.cbms.entity.po.Teacher">
+        <result property="id" column="id"></result>
+        <result property="name" column="name"></result>
+        <result property="teacherId" column="teacher_id"></result>
+        <result property="password" column="password"></result>
+        <result property="sex" column="sex"></result>
+        <result property="phone" column="phone"></result>
+        <result property="email" column="email"></result>
+        <result property="idCardNo" column="idcardno"></result>
+        <result property="birthday" column="birthday"></result>
+        <result property="imgPath" column="img_path"></result>
+        <result property="abstracts" column="abstracts"></result>
+        <result property="isPartyMember" column="isPartyMember"></result>
+        <result property="resultArea" column="result_area"></result>
+        <result property="joinPartyTime" column="join_party_time"></result>
+        <result property="startJobTime" column="start_job_time"></result>
+        <result property="reachOurSchoolTime" column="reach_our_school_time"></result>
+        <result property="zhicheng" column="zhicheng"></result>
+        <result property="record" column="record"></result>
+        <result property="degree" column="degree"></result>
+        <result property="graduateSchool" column="graduate_school"></result>
+        <result property="specialty" column="specialty"></result>
+        <result property="quarters" column="quarters"></result>
+        <result property="devideBySpecialty" column="devide_by_specialty"></result>
+        <result property="room" column="room"></result>
+        <result property="reachDeputyHighTime" column="reach_deputy_high_time"></result>
+        <result property="status" column="status"></result>
+
+    </resultMap>
+    
+    <sql id="teacher_all_column">
+        id,name,teacher_id,password,sex,phone,email,idcardno,birthday,img_path,abstracts,is_party_member,
+        result_area,join_party_time,start_job_time,reach_our_school_time,zhicheng,record,degree,graduate_school,
+        specialty,quarters,devide_by_specialty,room,reach_deputy_high_time,status
+    </sql>
+    
+    <sql id="teacher_base_column">
+        id,name,teacher_id,password,status
+    </sql>
+
+    <insert id="save" parameterType="com.gdupt.cbms.entity.po.Teacher">
+        insert into t_teacher(name,teacher_id,password,sex,phone,email,idcardno,birthday,img_path,abstracts,is_party_member,
+        result_area,join_party_time,start_job_time,reach_our_school_time,zhicheng,record,degree,graduate_school,
+        specialty,quarters,devide_by_specialty,room,reach_deputy_high_time,status)
+        values(#{name},#{teacherId}, #{password},#{sex},#{phone},#{email},#{idCardNo},#{birthday},#{imgPath},#{abstracts},
+        #{isPartyMember},#{resultArea},#{joinPartyTime},#{startJobTime},#{reachOurSchoolTime},#{zhicheng},#{record},#{degree},
+        #{graduateSchool},#{specialty},#{quarters},#{devideBySpecialty},#{room},#{reachDeputyHighTime},#{status})
+    </insert>
+
+
+    <select id="getAllTeacher" resultMap="teacherResultMap">
+        select <include refid="teacher_all_column"></include> from t_teacher
+    </select>
+
+    <select id="getOneTeacherById" parameterType="Integer" resultMap="teacherResultMap">
+        select <include refid="teacher_all_column"></include> from t_teacher <where>id=#{id}</where>
+    </select>
+
+    <select id="getTeacherLikeKey" parameterType="String" resultMap="teacherResultMap">
+        select <include refid="teacher_all_column"></include> from t_user WHERE #{key,jdbcType=VARCHAR} like concat('%',#{name,jdbcType=VARCHAR},'%')
+    </select>
+
+    <update id="fakeDeleteById">
+        update t_teacher set status=-1 <where>id=#{id}</where>
+    </update>
+
+    <update id="update" parameterType="com.gdupt.cbms.entity.po.Teacher">
+        update t_teacher
+        <set>
+            <if test="name != null">name =#{name}</if>
+            <if test="teacherId!=null">teacher_id=#{teacherId}</if>
+            <if test="password!=null">pssword=#{password}</if>
+            <if test="sex!=null">sex=#{sex}</if>
+            <if test="phone!=null">phone=#{phone}</if>
+            <if test="email!=null">email=#{email}</if>
+            <if test="idCardNo!=null">idcardno=#{idCardNo}</if>
+            <if test="birthday!=null">birthday=#{birthday}</if>
+            <if test="imgPath!=null">img_path=#{imgPath}</if>
+            <if test="abstracts!=null">abstracts=#{abstracts}</if>
+            <if test="isPartyMember!=null">is_party_member=#{isPartyMember}</if>
+            <if test="resultArea!=null">result_area=#{resultArea}</if>
+            <if test="joinPartyTime!=null">join_party_time=#{joinPartyTime}</if>
+            <if test="startJobTime!=null">start_job_time=#{startJobTime}</if>
+            <if test="reachOurSchoolTime!=null">reach_our_school_time=#{reachOurSchoolTime}</if>
+            <if test="zhicheng!=null">zhicheng=#{zhicheng}</if>
+            <if test="record!=null">record=#{record}</if>
+            <if test="degree!=null">degree=#{degree}</if>
+            <if test="graduateSchool!=null">graduate_school=#{graduateSchool}</if>
+            <if test="specialty!=null">specialty=#{specialty}</if>
+            <if test="quarters!=null">quarters=#{quarters}</if>
+            <if test="devideBySpecialty!=null">devide_by_specialty=#{devideBySpecialty}</if>
+            <if test="room!=null">room=#{room}</if>
+            <if test="reachDeputyHighTime!=null">reach_deputy_high_time=#{reachDeputyHighTime}</if>
+            <if test="status!=null">status=#{status}</if>
+        </set>
+        <where>id=#{id}</where>
+    </update>
+</mapper>

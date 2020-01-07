@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gdupt.cbms.mapper.SystemMapper">
+    <!--将数据库的字段和po类的属性进行映射-->
+    <resultMap id="resultMap" type="com.gdupt.cbms.entity.po.Setting">
+        <result property="siteName" column="sitename" />
+        <result property="siteUrl" column="siteurl" />
+    </resultMap>
+    <sql id="all_column">
+         id,sitename,siteurl,copyright,remark
+    </sql>
+    <!-- 查询所有-->
+    <select id="getSetting"  resultType="HashMap" resultMap="resultMap">
+        SELECT <include refid="all_column"/>
+        FROM t_system_setting;
+    </select>
+
+
+
+</mapper>
